@@ -1,12 +1,16 @@
 //********** Imports **********//
 import { Box, Toolbar } from "@mui/material";
 import { DashboardContentProps } from "./DashboardContent.types";
+import AddForm from "../../../AddTODO/4-template/AddForm";
 
 //********** Component **********//
 const DashboardContent = (props: DashboardContentProps) => {
   const { selectedItemId } = props;
   let content;
   switch (selectedItemId) {
+    case "add":
+      content = <AddForm />;
+      break;
     default:
       content = <></>;
       break;
