@@ -1,4 +1,4 @@
-name: Déploiement vers Vercel
+name: Déploiement vers Vercel après exécution des tests
 
 # Condition de déclenchement
 on:
@@ -7,33 +7,58 @@ on:
       - main # Déclenchement sur la branche principale (main)
 
 jobs:
+  # Premier job: exécution des tests
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Vérifier le code source
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Configurer Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22 # Remplacez par la version Node.js utilisée par votre projet
+
+      # Installer les dépendances
+      - name: Install dependencies
+        run: npm install
+
+      # Exécuter les tests
+      - name: Run tests
+        run: npm test
+
+  # Deuxième job: déploiement
   deploy:
+    needs: test # Exécute le job de déploiement seulement si le job "test" réussi
     runs-on: ubuntu-latest
 
     # Etapes
     steps:
-    # 1. Checkout du code source
-    - name: Checkout du code
-      uses: actions/checkout@v3
+      # 1. Checkout du code source
+      - name: Checkout du code
+        uses: actions/checkout@v3
 
-    # 2. Installation de Node.js et des dépendances
-    - name: Installation de Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '22'
-        cache: 'npm'
+      # 2. Installation de Node.js et des dépendances
+      - name: Installation de Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "22" # Remplacez par la version Node.js utilisée par votre projet
+          cache: "npm"
 
-    - name: Installation des dépendances
-      run: npm install
+      - name: Installation des dépendances
+        run: npm install
 
-    # 3. Construire l'application React
-    - name: Build de l'application
-      run: npm run build
+      # 3. Construire l'application React
+      - name: Build de l'application
+        run: npm run build
 
-    # 4. Déployer sur Vercel
-    - name: Déploiement
-      env:
-        VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      run: |
-        npm install -g vercel
-        vercel --prod --token $VERCEL_TOKEN --yes
+      # 4. Déployer sur Vercel
+      - name: Déploiement
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          npm install -g vercel
+          vercel --prod --token $VERCEL_TOKEN --yes
