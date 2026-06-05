@@ -1,4 +1,4 @@
 //********** Props **********//
 export interface AddFormProps {
-  onSubmitClick?: () => void;
+  onSubmitClick?: (newValue: string) => void;
 }
