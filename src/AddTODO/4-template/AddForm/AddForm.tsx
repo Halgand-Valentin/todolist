@@ -1,10 +1,20 @@
 //********** Imports **********//
 import { Box, Button, TextField, Typography } from "@mui/material";
+import { useState } from "react";
+import { useDispatch } from "react-redux";
 import { AddFormProps } from "./AddForm.types";
 
 //********** Component **********//
 const AddForm = (props: AddFormProps) => {
   const { onSubmitClick } = props;
+  const [todo, setTodo] = useState<string>();
+
+  const handleClick = () => {
+    if (onSubmitClick && todo && todo !== "") {
+      onSubmitClick(todo);
+      setTodo("");
+    }
+  };
   return (
     <Box
       component="form"
@@ -23,13 +33,17 @@ const AddForm = (props: AddFormProps) => {
           id="outlined-required"
           label="Tâche"
           fullWidth
+          onChange={(e) => {
+            setTodo(e.target.value);
+          }}
+          value={todo}
         />
       </div>
       <div style={{ marginLeft: 10 }}>
         <Button
           variant="contained"
           data-testid="AddTODOFormButton"
-          onClick={onSubmitClick}
+          onClick={handleClick}
         >
           Ajouter
         </Button>
