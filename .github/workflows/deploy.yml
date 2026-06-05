@@ -1,4 +1,4 @@
-name: Déploiement vers Vercel après exécution des tests
+name: Deploy
 
 on:
   push:
@@ -6,25 +6,23 @@ on:
       - main
 
 jobs:
-  # Ton job existant (test)
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      # ... le reste de tes steps ...
+      - name: Install
+        run: npm install
+      - name: Test
+        run: npm test
 
-  # TON NOUVEAU JOB DOIT ÊTRE ICI
-  # Il doit être aligné avec le mot "test" ci-dessus (2 espaces)
   sonarcloud:
     name: SonarCloud Scan
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Run SonarCloud Scan
+      - name: SonarCloud Scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          npx sonarqube-scanner
+        run: npx sonarqube-scanner
