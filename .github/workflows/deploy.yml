@@ -1,78 +1,37 @@
-name: Déploiement vers Vercel après exécution des tests
-
-# Condition de déclenchement
+name: Deploy
 on:
   push:
     branches:
-      - main # Déclenchement sur la branche principale (main)
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
-  # Premier job : exécution des tests
-  test:
-    runs-on: ubuntu-latest
-
-    steps:
-    # Vérifier le code source
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    # Configurer Node.js
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: 22
-
-    # Installer les dépendances
-    - name: Install dependencies
-      run: npm install
-
-    # Exécuter les tests
-    - name: Run tests
-      run: npm test
-
-  # Deuxième job : déploiement
-  deploy:
-    needs: test # Exécute le job de déploiement seulement si le job "test" a réussi
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout du code
-      uses: actions/checkout@v3
-
-    - name: Installation de Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: "22"
-        cache: "npm"
-
-    - name: Installation des dépendances
-      run: npm install
-
-    - name: Build de l'application
-      run: npm run build
-
-    - name: Déploiement
-      env:
-        VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      run: |
-        npm install -g vercel
-        vercel --prod --token $VERCEL_TOKEN --yesss
-
-       name: Deploy
-on: [push]
-jobs:
-  build:      # Ton premier job existant
+  build:
     runs-on: ubuntu-latest
     steps:
-      ...
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: npm install
+      - name: Build
+        run: npm run build
 
-  deploy:     # Ton deuxième job existant (si tu en as un)
-    runs-on: ubuntu-latest
-    steps:
-      ...
-
-  sonarcloud: # <--- TON NOUVEAU JOB DOIT ÊTRE ICI, AU MÊME NIVEAU
+  sonarcloud:
     name: SonarCloud Scan
     runs-on: ubuntu-latest
     steps:
-      ...
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      - name: Run SonarCloud Scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          npx sonarqube-scanner
