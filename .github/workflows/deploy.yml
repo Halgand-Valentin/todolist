@@ -1,59 +1,28 @@
-name: Déploiement vers Vercel après exécution des tests
+name: Deploy
 
-# Condition de déclenchement
 on:
   push:
     branches:
-      - main # Déclenchement sur la branche principale (main)
+      - main
 
 jobs:
-  # Premier job : exécution des tests
   test:
     runs-on: ubuntu-latest
-
     steps:
-    # Vérifier le code source
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+      - name: Install
+        run: npm install
+      - name: Test
+        run: npm test
 
-    # Configurer Node.js
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: 22
-
-    # Installer les dépendances
-    - name: Install dependencies
-      run: npm install
-
-    # Exécuter les tests
-    - name: Run tests
-      run: npm test
-
-  # Deuxième job : déploiement
-  deploy:
-    needs: test # Exécute le job de déploiement seulement si le job "test" a réussi
+  sonarcloud:
+    name: SonarCloud Scan
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout du code
-      uses: actions/checkout@v3
-
-    - name: Installation de Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: "22"
-        cache: "npm"
-
-    - name: Installation des dépendances
-      run: npm install
-
-    - name: Build de l'application
-      run: npm run build
-
-    - name: Déploiement
-      env:
-        VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      run: |
-        npm install -g vercel
-        vercel --prod --token $VERCEL_TOKEN --yes
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: SonarCloud Scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: npx sonarqube-scanner

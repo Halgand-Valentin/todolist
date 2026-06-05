@@ -4,6 +4,7 @@ import { DashboardContentProps } from "./DashboardContent.types";
 import AddForm from "../../../AddTODO/4-template/AddForm";
 import { useDispatch } from "react-redux";
 import { addTodo } from "../../../redux/todoSlice";
+import List from "../../../List/4-template/List";
 
 //********** Component **********//
 const DashboardContent = (props: DashboardContentProps) => {
@@ -19,6 +20,9 @@ const DashboardContent = (props: DashboardContentProps) => {
           }}
         />
       );
+      break;
+    case "todoList":
+      content = <List />;
       break;
     default:
       content = <></>;
